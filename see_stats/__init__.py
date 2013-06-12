@@ -2,6 +2,8 @@ from urllib.parse import urlparse
 
 from gridfs import GridFS
 import pymongo
+from pyramid.authentication import AuthTktAuthenticationPolicy
+from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
 from pyramid.events import NewRequest
 from pyramid.session import UnencryptedCookieSessionFactoryConfig
@@ -13,9 +15,19 @@ def main(global_config, **settings):
     # TODO: Update to use beaker
     session_factory = UnencryptedCookieSessionFactoryConfig('secret')
 
+    # TODO: Something secure.
+    authn_policy = AuthTktAuthenticationPolicy(
+        'sosecret',
+        # callback=groupfinder,
+        hashalg='sha512')
+    authz_policy = ACLAuthorizationPolicy()
+
     config = Configurator(
         settings=settings,
         session_factory=session_factory)
+
+    config.set_authentication_policy(authn_policy)
+    config.set_authorization_policy(authz_policy)
 
     config.add_renderer(
         name='.mustache',
@@ -41,5 +53,7 @@ def main(global_config, **settings):
     config.add_route('upload', '/upload')
     config.add_route('profiles', '/profiles')
     config.add_route('process_upload', '/process_upload')
+    config.add_route('login', '/login')
+    config.add_route('logout', '/logout')
     config.scan()
     return config.make_wsgi_app()

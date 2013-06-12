@@ -1,5 +1,8 @@
 from pyramid.httpexceptions import HTTPFound
 from pyramid.response import Response
+from pyramid.security import (authenticated_userid,
+                              remember,
+                              forget)
 from pyramid.view import view_config
 
 
@@ -16,6 +19,7 @@ def profiles(request):
     return {
         'flash': [{'msg': f} for f in request.session.pop_flash()],
         'lengths': [{'l': len(p['data']) } for p in request.db['profiles'].find()],
+        'logged_in': authenticated_userid(request),
     }
 
 @view_config(route_name='process_upload')
@@ -27,7 +31,11 @@ def process_upload(request):
     # compatibility guarantee between versions.
     # Perhaps we need to abstract it somehow...use our own format. But how?
     request.db['profiles'].insert(
-        {'data': input_file.read() })
+        {
+            'data': input_file.read(),
+            'public': True,
+            'userid': 'dummy',
+        })
 
     # with tempfile.TemporaryDirectory() as tempdir:
     #     fname = os.path.join(tempdir.name, 'profiledata')
@@ -78,3 +86,42 @@ def process_upload(request):
 
     request.session.flash('Data uploaded')
     return HTTPFound('/profiles')
+
+@view_config(route_name='login', renderer='templates/login.mustache')
+def login(request):
+    login_url = request.route_url('login')
+    referrer = request.url
+    if referrer == login_url:
+        referrer = '/profiles'
+    came_from = request.params.get('came_from', referrer)
+    message = ''
+    login = ''
+    # password = ''
+    if 'form.submitted' in request.params:
+        login = request.params['login']
+        # password = request.params['password']
+        #if USERS.get(login) == password:
+        headers = remember(request, login)
+        return HTTPFound(location=came_from,
+                         headers=headers)
+        # message = 'Failed login'
+
+    return dict(
+        message = message,
+        url = request.application_url + '/login',
+        came_from = came_from,
+        login = login,
+        # password = password,
+
+        # common stuff. TODO: Refactor?
+        favicon = request.static_url('see_stats:static/favicon.ico'),
+        stylesheet = request.static_url('see_stats:static/pylons.css'),
+        small_logo = request.static_url('see_stats:static/pyramid-small.png')
+        )
+
+@view_config(route_name='logout')
+def logout(request):
+    headers = forget(request)
+    return HTTPFound(
+        location='/profiles',
+        headers=headers)

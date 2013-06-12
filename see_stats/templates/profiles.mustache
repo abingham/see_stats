@@ -4,6 +4,9 @@
     <title>Profile listing</title>
 </head>
 <body>
+{{#logged_in}}
+Hello {{logged_in}}!
+{{/logged_in}}
 {{#flash}}
 <small>{{msg}}</small>
 {{/flash}}
