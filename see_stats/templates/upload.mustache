@@ -2,15 +2,29 @@
 <html>
 <head>
     <title>Upload cProfile file</title>
+    <link href="/static/bootstrap/css/bootstrap.min.css"
+          rel="stylesheet"
+          media="screen">
 </head>
 <body>
-  <form action="/process_upload" method="post" accept-charset="utf-8"
+  <form action="/process_upload"
+        method="post"
+        accept-charset="utf-8"
         enctype="multipart/form-data">
+    <fieldset>
+      <legend>Upload cProfile results</legend>
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="3"></textarea>
 
-    <label for="stats_file">Stats file</label>
-    <input id="stats_file" name="stats_file" type="file" value="" />
+      <label for="stats_file">Stats file</label>
+      <input id="stats_file" name="stats_file" type="file" value="" />
 
-    <input type="submit" value="submit" />
+      <label class="checkbox">
+        <input name="public" type="checkbox">Public
+      </label>
+
+      <button type="submit" value="submit" class="btn">Submit</button>
+    </fieldset>
   </form>
 
   <!-- <form id="form1" enctype="multipart/form-data" method="post" action="Upload.aspx"> -->

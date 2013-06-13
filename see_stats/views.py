@@ -46,15 +46,22 @@ def profile(request):
 
 @view_config(route_name='process_upload')
 def process_upload(request):
+    description = request.POST['description']
     input_file = request.POST['stats_file'].file
+
+    try:
+        public = (request.POST['public'] == 'on')
+    except KeyError:
+        public = False
 
     # TODO: What else to store? We have an issue with versions, which
     # is that the pstats an cprofile must match. There is no
     # compatibility guarantee between versions.
     # Perhaps we need to abstract it somehow...use our own format. But how?
     profile_id = request.db.insert(
+        description=description,
         data=input_file.read(),
-        public=True,
+        public=public,
         userid='dummy')
 
     return HTTPFound('/profile/{}'.format(profile_id))
