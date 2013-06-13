@@ -7,19 +7,26 @@
 <body>
 {{> header}}
 <div class="container-fluid">
-  {{#entries}}
   <div class="row-fluid">
-    <div class="span6">
-      <a href="/profile/{{_id}}">{{description}}</a>
-    </div>
-    <div class="span2">
-      {{userid}}
-    </div>
-    <div class="span2">
-      {{timestamp}}
-    </div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>User</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#entries}}
+        <tr>
+          <td><a href="/profile/{{_id}}">{{description}}</a></td>
+          <td>{{userid}}</td>
+          <td>{{timestamp}}</td>
+        </tr>
+        {{/entries}}
+      </tbody>
+    </table>
   </div>
-  {{/entries}}
 </div>
 </body>
 {{> common_js}}
