@@ -6,14 +6,21 @@
 </head>
 <body>
 {{> header}}
-Profile lengths...
-<ul>
-{{#entries}}
-<li><a href="/profile/{{_id}}">a profile!</a></li>
-{{/entries}}
-</ul>
-<hr>
-That's all...
+<div class="container-fluid">
+  {{#entries}}
+  <div class="row-fluid">
+    <div class="span6">
+      <a href="/profile/{{_id}}">{{description}}</a>
+    </div>
+    <div class="span2">
+      {{userid}}
+    </div>
+    <div class="span2">
+      {{timestamp}}
+    </div>
+  </div>
+  {{/entries}}
+</div>
 </body>
 {{> common_js}}
 </html>
