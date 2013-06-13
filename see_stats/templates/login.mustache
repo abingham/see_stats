@@ -4,19 +4,8 @@
       xmlns:tal="http://xml.zope.org/namespaces/tal">
 <head>
   <title>Login</title>
-  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
-  <meta name="keywords" content="python web application" />
-  <meta name="description" content="pyramid web application" />
-  <link rel="shortcut icon"
-        href="{{favicon}}" />
-  <link rel="stylesheet"
-        href="{{stylesheet}}"
-        type="text/css" media="screen" charset="utf-8" />
-  <!--[if lte IE 6]>
-  <link rel="stylesheet"
-        href="${request.static_url('tutorial:static/ie6.css')}"
-        type="text/css" media="screen" charset="utf-8" />
-  <![endif]-->
+  {{> common_head}}
+  {{> common_css}}
 </head>
 <body>
   <div id="wrap">
