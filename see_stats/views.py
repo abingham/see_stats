@@ -11,19 +11,20 @@ from pyramid.security import (authenticated_userid,
 from pyramid.view import view_config
 
 
-@view_config(route_name='home', renderer='templates/mytemplate.pt')
-def my_view(request):
-    return {'project': 'see_stats'}
-
 @view_config(route_name='upload', renderer='templates/upload.mustache')
 def upload(request):
-    return {}
+    return {
+        'userid': authenticated_userid(request),
+    }
 
 @view_config(route_name='profiles', renderer='templates/profiles.mustache')
 def profiles(request):
+    userid = authenticated_userid(request)
+    visible = lambda p: p['public'] or (p['userid'] == userid)
+
     return {
-        'entries': list(request.db.profiles()),
-        'logged_in': authenticated_userid(request),
+        'entries': list(filter(visible, request.db.profiles())),
+        'userid': userid,
     }
 
 @view_config(route_name='profile', renderer='templates/profile.mustache')
@@ -41,7 +42,8 @@ def profile(request):
 
     sio.seek(0)
     return {
-        'stats': sio.read()
+        'stats': sio.read(),
+        'userid': authenticated_userid(request),
     }
 
 @view_config(route_name='process_upload')
@@ -142,7 +144,8 @@ def login(request):
         # common stuff. TODO: Refactor?
         favicon = request.static_url('see_stats:static/favicon.ico'),
         stylesheet = request.static_url('see_stats:static/pylons.css'),
-        small_logo = request.static_url('see_stats:static/pyramid-small.png')
+        small_logo = request.static_url('see_stats:static/pyramid-small.png'),
+        userid = authenticated_userid(request),
         )
 
 @view_config(route_name='logout')

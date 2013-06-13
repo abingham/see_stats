@@ -1,6 +1,9 @@
-{{#logged_in}}
-Hello {{logged_in}}!
-{{/logged_in}}
+{{#userid}}
+Hello {{userid}}!
+{{/userid}}
+{{^userid}}
+Not logged in.
+{{/userid}}
 <div class="container-fluid">
   <div class="row-fluid">
     <div class="span10">
