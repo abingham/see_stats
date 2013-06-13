@@ -52,6 +52,7 @@ def main(global_config, **settings):
     config.add_route('home', '/')
     config.add_route('upload', '/upload')
     config.add_route('profiles', '/profiles')
+    config.add_route('profile', '/profile/{profile_id}')
     config.add_route('process_upload', '/process_upload')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')

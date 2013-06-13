@@ -1,3 +1,9 @@
+import io
+import os
+import pstats
+import tempfile
+
+from bson.objectid import ObjectId
 from pyramid.httpexceptions import HTTPFound
 from pyramid.response import Response
 from pyramid.security import (authenticated_userid,
@@ -17,9 +23,26 @@ def upload(request):
 @view_config(route_name='profiles', renderer='templates/profiles.mustache')
 def profiles(request):
     return {
-        'flash': [{'msg': f} for f in request.session.pop_flash()],
         'lengths': [{'l': len(p['data']) } for p in request.db['profiles'].find()],
         'logged_in': authenticated_userid(request),
+    }
+
+@view_config(route_name='profile', renderer='templates/profile.mustache')
+def profile(request):
+    profile_id = request.matchdict['profile_id']
+    # TODO: Instead of the db, we should be passing around an
+    # abstraction over it. Something simple...a model layer.
+    entry = request.db['profiles'].find_one({'_id': ObjectId(profile_id)})
+    with tempfile.TemporaryDirectory() as tdir:
+        fname = os.path.join(tdir, 'profile')
+        with open(fname, 'w+b') as tfile:
+            tfile.write(entry['data'])
+        sio = io.StringIO()
+        pstats.Stats(fname, stream=sio).print_stats()
+
+    sio.seek(0)
+    return {
+        'stats': sio.read()
     }
 
 @view_config(route_name='process_upload')
@@ -30,12 +53,14 @@ def process_upload(request):
     # is that the pstats an cprofile must match. There is no
     # compatibility guarantee between versions.
     # Perhaps we need to abstract it somehow...use our own format. But how?
-    request.db['profiles'].insert(
+    profile_id = request.db['profiles'].insert(
         {
             'data': input_file.read(),
             'public': True,
             'userid': 'dummy',
         })
+
+    return HTTPFound('/profile/{}'.format(profile_id))
 
     # with tempfile.TemporaryDirectory() as tempdir:
     #     fname = os.path.join(tempdir.name, 'profiledata')
@@ -83,9 +108,6 @@ def process_upload(request):
     # os.rename(temp_file_path, file_path)
 
     # return Response('OK')
-
-    request.session.flash('Data uploaded')
-    return HTTPFound('/profiles')
 
 @view_config(route_name='login', renderer='templates/login.mustache')
 def login(request):
