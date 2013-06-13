@@ -3,7 +3,6 @@ import os
 import pstats
 import tempfile
 
-from bson.objectid import ObjectId
 from pyramid.httpexceptions import HTTPFound
 from pyramid.response import Response
 from pyramid.security import (authenticated_userid,
@@ -23,7 +22,7 @@ def upload(request):
 @view_config(route_name='profiles', renderer='templates/profiles.mustache')
 def profiles(request):
     return {
-        'lengths': [{'l': len(p['data']) } for p in request.db['profiles'].find()],
+        'lengths': [{'l': len(p['data']) } for p in request.db.profiles()],
         'logged_in': authenticated_userid(request),
     }
 
@@ -32,7 +31,7 @@ def profile(request):
     profile_id = request.matchdict['profile_id']
     # TODO: Instead of the db, we should be passing around an
     # abstraction over it. Something simple...a model layer.
-    entry = request.db['profiles'].find_one({'_id': ObjectId(profile_id)})
+    entry = request.db.profile(profile_id)
     with tempfile.TemporaryDirectory() as tdir:
         fname = os.path.join(tdir, 'profile')
         with open(fname, 'w+b') as tfile:
@@ -53,12 +52,10 @@ def process_upload(request):
     # is that the pstats an cprofile must match. There is no
     # compatibility guarantee between versions.
     # Perhaps we need to abstract it somehow...use our own format. But how?
-    profile_id = request.db['profiles'].insert(
-        {
-            'data': input_file.read(),
-            'public': True,
-            'userid': 'dummy',
-        })
+    profile_id = request.db.insert(
+        data=input_file.read(),
+        public=True,
+        userid='dummy')
 
     return HTTPFound('/profile/{}'.format(profile_id))
 

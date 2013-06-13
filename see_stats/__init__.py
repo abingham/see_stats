@@ -8,6 +8,8 @@ from pyramid.config import Configurator
 from pyramid.events import NewRequest
 from pyramid.session import UnencryptedCookieSessionFactoryConfig
 
+from .profile_db import ProfileDB
+
 
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
@@ -43,7 +45,7 @@ def main(global_config, **settings):
         db = settings['db_conn'][db_url.path[1:]]
         if db_url.username and db_url.password:
             db.authenticate(db_url.username, db_url.password)
-        event.request.db = db
+        event.request.db = ProfileDB(db)
         # event.request.trail_fs = GridFS(db)
 
     config.add_subscriber(add_mongo_db, NewRequest)
