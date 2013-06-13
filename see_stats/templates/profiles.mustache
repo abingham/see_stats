@@ -2,13 +2,10 @@
 <html>
 <head>
     <title>Profile listing</title>
+    {{> common_css}}
 </head>
 <body>
-{{#logged_in}}
-Hello {{logged_in}}!
-{{/logged_in}}
-
-<hr>
+{{> header}}
 Profile lengths...
 <ul>
 {{#entries}}
@@ -18,4 +15,5 @@ Profile lengths...
 <hr>
 That's all...
 </body>
+{{> common_js}}
 </html>
