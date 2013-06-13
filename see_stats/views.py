@@ -22,7 +22,7 @@ def upload(request):
 @view_config(route_name='profiles', renderer='templates/profiles.mustache')
 def profiles(request):
     return {
-        'lengths': [{'l': len(p['data']) } for p in request.db.profiles()],
+        'entries': list(request.db.profiles()),
         'logged_in': authenticated_userid(request),
     }
 
