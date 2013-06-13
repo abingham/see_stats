@@ -51,7 +51,6 @@ def main(global_config, **settings):
     config.add_subscriber(add_mongo_db, NewRequest)
 
     config.add_static_view('static', 'static', cache_max_age=3600)
-    config.add_route('home', '/')
     config.add_route('upload', '/upload')
     config.add_route('profiles', '/profiles')
     config.add_route('profile', '/profile/{profile_id}')
