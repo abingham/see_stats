@@ -22,6 +22,21 @@ def common_response(request, rsp):
         ))
     return rslt
 
+
+class StatsFacade:
+    """This exists to fool the pstats.Stats.load_stats() function into
+    getting it's data from something other than a file or a Profile
+    object.
+    """
+
+    def __init__(self, raw):
+        import marshal
+        self.stats = marshal.loads(raw)
+
+    def create_stats(self):
+        pass
+
+
 @view_config(route_name='upload', renderer='templates/upload.mustache')
 def upload(request):
     return common_response(
@@ -45,16 +60,11 @@ def profiles(request):
 @view_config(route_name='profile', renderer='templates/profile.mustache')
 def profile(request):
     profile_id = request.matchdict['profile_id']
-    # TODO: Instead of the db, we should be passing around an
-    # abstraction over it. Something simple...a model layer.
-    entry = request.db.profile(profile_id)
-    with tempfile.TemporaryDirectory() as tdir:
-        fname = os.path.join(tdir, 'profile')
-        with open(fname, 'w+b') as tfile:
-            tfile.write(entry['data'])
-        sio = io.StringIO()
-        pstats.Stats(fname, stream=sio).print_stats()
 
+    entry = request.db.profile(profile_id)
+    sio = io.StringIO()
+    sf = StatsFacade(entry['data'])
+    pstats.Stats(sf, stream=sio).print_stats()
     sio.seek(0)
     return common_response(
         request,
@@ -81,7 +91,7 @@ def process_upload(request):
         description=description,
         data=input_file.read(),
         public=public,
-        userid='dummy')
+        userid=authenticated_userid(request))
 
     return HTTPFound('/profile/{}'.format(profile_id))
 
